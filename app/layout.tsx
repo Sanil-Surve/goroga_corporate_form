@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GoRoga Corporate Event Form",
+  title: "GoRoga Feedback Form",
   description: "Post-session feedback form for GoRoga corporate events.",
 };
 

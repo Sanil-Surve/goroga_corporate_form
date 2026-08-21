@@ -142,7 +142,7 @@ export default function GoRogaForm() {
               <span className="text-red-500 ml-0.5">*</span>
             </label>
             <input
-              type="text"
+              type="number"
               required
               value={pulseBefore}
               onChange={(e) => setPulseBefore(e.target.value)}
@@ -158,7 +158,7 @@ export default function GoRogaForm() {
               <span className="text-red-500 ml-0.5">*</span>
             </label>
             <input
-              type="text"
+              type="number"
               required
               value={pulseAfter}
               onChange={(e) => setPulseAfter(e.target.value)}
