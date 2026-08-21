@@ -112,11 +112,11 @@ export default function GoRogaForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0a7e8c 0%, #085f6a 50%, #064d57 100%)' }}>
-      <div className="w-full max-w-2xl">
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-6" style={{ background: 'linear-gradient(135deg, #0a7e8c 0%, #085f6a 50%, #064d57 100%)' }}>
+      <div className="w-full max-w-2xl my-3 sm:my-8">
         {/* Header card */}
         <div
-          className="rounded-t-2xl px-8 pt-8 pb-6 shadow-lg"
+          className="rounded-t-2xl px-5 sm:px-8 pt-6 sm:pt-8 pb-5 sm:pb-6 shadow-lg"
           style={{
             background: 'linear-gradient(135deg, #085f6a 0%, #064d57 100%)',
             borderTop: '6px solid #a7dde3',
@@ -124,8 +124,8 @@ export default function GoRogaForm() {
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white leading-tight">GoRoga Feedback Form</h1>
-              <p className="mt-2 text-sm" style={{ color: '#b8e8ec' }}>* Indicates required question</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">GoRoga Feedback Form</h1>
+              <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm" style={{ color: '#b8e8ec' }}>* Indicates required question</p>
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function GoRogaForm() {
           className="bg-white rounded-b-2xl shadow-xl divide-y divide-gray-100"
         >
           {/* Q1.1 */}
-          <div className="px-8 py-6">
+          <div className="px-5 sm:px-8 py-5 sm:py-6">
             <label className="block text-sm font-medium text-gray-800 mb-2">
               1.1) Pulse Reading Before Session{' '}
               <span className="text-red-500 ml-0.5">*</span>
@@ -152,7 +152,7 @@ export default function GoRogaForm() {
           </div>
 
           {/* Q1.2 */}
-          <div className="px-8 py-6">
+          <div className="px-5 sm:px-8 py-5 sm:py-6">
             <label className="block text-sm font-medium text-gray-800 mb-2">
               1.2) Pulse Reading After Session{' '}
               <span className="text-red-500 ml-0.5">*</span>
@@ -168,7 +168,7 @@ export default function GoRogaForm() {
           </div>
 
           {/* Q2 */}
-          <div className="px-8 py-6">
+          <div className="px-5 sm:px-8 py-5 sm:py-6">
             <fieldset>
               <legend className="text-sm font-medium text-gray-800 mb-3">
                 2) How do you feel now compared to before the session?{' '}
@@ -196,7 +196,7 @@ export default function GoRogaForm() {
           </div>
 
           {/* Q3 */}
-          <div className="px-8 py-6">
+          <div className="px-5 sm:px-8 py-5 sm:py-6">
             <fieldset>
               <legend className="text-sm font-medium text-gray-800 mb-3">
                 3) What did you notice the most?{' '}
@@ -245,7 +245,7 @@ export default function GoRogaForm() {
           </div>
 
           {/* Q4 */}
-          <div className="px-8 py-6">
+          <div className="px-5 sm:px-8 py-5 sm:py-6">
             <fieldset>
               <legend className="text-sm font-medium text-gray-800 mb-3">
                 4) Would you use GoRoga again?{' '}
@@ -273,7 +273,7 @@ export default function GoRogaForm() {
           </div>
 
           {/* Q5 */}
-          <div className="px-8 py-6">
+          <div className="px-5 sm:px-8 py-5 sm:py-6">
             <label className="block text-sm font-medium text-gray-800 mb-2">
               Describe your experience in one word.{' '}
               <span className="text-red-500 ml-0.5">*</span>
@@ -290,15 +290,15 @@ export default function GoRogaForm() {
 
           {/* Error message */}
           {submitState === 'error' && (
-            <div className="px-8 py-3 bg-red-50 text-red-600 text-sm">{errorMsg}</div>
+            <div className="px-5 sm:px-8 py-3 bg-red-50 text-red-600 text-sm">{errorMsg}</div>
           )}
 
           {/* Actions */}
-          <div className="px-8 py-6 flex items-center gap-4">
+          <div className="px-5 sm:px-8 py-5 sm:py-6 flex items-center gap-4">
             <button
               type="submit"
               disabled={submitState === 'loading'}
-              className="px-8 py-2.5 rounded-full text-white font-medium shadow-md transition-opacity hover:opacity-90 disabled:opacity-70"
+              className="px-6 sm:px-8 py-2.5 rounded-full text-white font-medium shadow-md transition-opacity hover:opacity-90 disabled:opacity-70 cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #0a7e8c, #064d57)' }}
             >
               {submitState === 'loading' ? 'Submitting…' : 'Submit'}
@@ -306,14 +306,14 @@ export default function GoRogaForm() {
             <button
               type="button"
               onClick={handleClear}
-              className="text-sm font-medium transition-colors hover:opacity-70"
+              className="text-sm font-medium transition-colors hover:opacity-70 cursor-pointer"
               style={{ color: '#0a7e8c' }}
             >
               Clear form
             </button>
           </div>
 
-          <p className="px-8 py-4 text-xs text-gray-400 rounded-b-2xl">
+          <p className="px-5 sm:px-8 py-4 text-xs text-gray-400 rounded-b-2xl">
             Never submit passwords through this form.
           </p>
         </form>
