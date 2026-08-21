@@ -204,7 +204,7 @@ export default function AdminPage() {
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">GoRoga Admin Panel</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight">GoRoga Admin Panel</h1>
           </div>
           <div className="flex items-center gap-3">
             <button
