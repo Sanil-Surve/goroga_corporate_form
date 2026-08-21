@@ -1,69 +1,386 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+
+const FEEL_OPTIONS = ['Much Better', 'Better', 'Same', 'Worse'] as const;
+const NOTICED_OPTIONS = [
+  'More Relaxed',
+  'Calmer Mind',
+  'Better Focus',
+  'Less Stress',
+  'More Energy',
+  'No Difference',
+] as const;
+const USE_AGAIN_OPTIONS = ['Yes', 'No', 'Maybe'] as const;
+
+type SubmitState = 'idle' | 'loading' | 'success' | 'error';
+
+export default function GoRogaForm() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNo, setPhoneNo] = useState('');
+  const [pulseBefore, setPulseBefore] = useState('');
+  const [pulseAfter, setPulseAfter] = useState('');
+  const [feeling, setFeeling] = useState('');
+  const [noticed, setNoticed] = useState<string[]>([]);
+  const [noticedOther, setNoticedOther] = useState('');
+  const [showOther, setShowOther] = useState(false);
+  const [wouldUseAgain, setWouldUseAgain] = useState('');
+  const [oneWord, setOneWord] = useState('');
+  const [submitState, setSubmitState] = useState<SubmitState>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const toggleNoticed = (value: string) => {
+    setNoticed((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
+  const handleOtherToggle = (checked: boolean) => {
+    setShowOther(checked);
+    if (!checked) setNoticedOther('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitState('loading');
+    setErrorMsg('');
+
+    const allNoticed = [...noticed];
+    if (showOther && noticedOther.trim()) {
+      allNoticed.push(noticedOther.trim());
+    }
+
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          phone_no: phoneNo,
+          pulse_before: pulseBefore,
+          pulse_after: pulseAfter,
+          feeling,
+          noticed: allNoticed,
+          would_use_again: wouldUseAgain,
+          one_word: oneWord,
+        }),
+      });
+
+      if (res.ok) {
+        setSubmitState('success');
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.error || 'Something went wrong.');
+        setSubmitState('error');
+      }
+    } catch {
+      setErrorMsg('Network error. Please try again.');
+      setSubmitState('error');
+    }
+  };
+
+  const handleClear = () => {
+    setName('');
+    setEmail('');
+    setPhoneNo('');
+    setPulseBefore('');
+    setPulseAfter('');
+    setFeeling('');
+    setNoticed([]);
+    setNoticedOther('');
+    setShowOther(false);
+    setWouldUseAgain('');
+    setOneWord('');
+    setSubmitState('idle');
+    setErrorMsg('');
+  };
+
+  if (submitState === 'success') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0a7e8c 0%, #085f6a 50%, #064d57 100%)' }}>
+        <div className="bg-white rounded-2xl shadow-xl p-10 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#e0f4f6' }}>
+            <svg className="w-8 h-8" fill="none" stroke="#0a7e8c" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank you!</h2>
+          <p className="text-gray-500 mb-6">Your response has been recorded successfully.</p>
+          <button
+            onClick={handleClear}
+            className="px-6 py-2 rounded-full text-white font-medium transition-opacity hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #0a7e8c, #064d57)' }}
+          >
+            Submit another response
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #0a7e8c 0%, #085f6a 50%, #064d57 100%)' }}>
+      <div className="w-full max-w-2xl">
+        {/* Header card */}
+        <div
+          className="rounded-t-2xl px-8 pt-8 pb-6 shadow-lg"
+          style={{
+            background: 'linear-gradient(135deg, #085f6a 0%, #064d57 100%)',
+            borderTop: '6px solid #a7dde3',
+          }}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white leading-tight">GoRoga Corporate Event Form</h1>
+              <p className="mt-2 text-sm" style={{ color: '#b8e8ec' }}>* Indicates required question</p>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        {/* Form card */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-b-2xl shadow-xl divide-y divide-gray-100"
+        >
+          {/* Personal Details */}
+          <div className="px-8 py-6">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#0a7e8c' }}>
+              Personal Details
+            </p>
+            <div className="space-y-5">
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1.5">
+                  Full Name <span className="text-red-500 ml-0.5">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
+                />
+              </div>
+
+              {/* Email + Phone side by side on md+ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1.5">
+                    Email Address <span className="text-red-500 ml-0.5">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1.5">
+                    Phone Number <span className="text-red-500 ml-0.5">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={phoneNo}
+                    onChange={(e) => setPhoneNo(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    pattern="[\+\d\s\-\(\)]{7,20}"
+                    title="Enter a valid phone number"
+                    className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Q1.1 */}
+          <div className="px-8 py-6">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
+              1.1) Pulse Reading Before Session{' '}
+              <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={pulseBefore}
+              onChange={(e) => setPulseBefore(e.target.value)}
+              placeholder="Your answer"
+              className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+
+          {/* Q1.2 */}
+          <div className="px-8 py-6">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
+              1.2) Pulse Reading After Session{' '}
+              <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={pulseAfter}
+              onChange={(e) => setPulseAfter(e.target.value)}
+              placeholder="Your answer"
+              className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
+            />
+          </div>
+
+          {/* Q2 */}
+          <div className="px-8 py-6">
+            <fieldset>
+              <legend className="text-sm font-medium text-gray-800 mb-3">
+                2) How do you feel now compared to before the session?{' '}
+                <span className="text-red-500 ml-0.5">*</span>
+              </legend>
+              <div className="space-y-2">
+                {FEEL_OPTIONS.map((option) => (
+                  <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="feeling"
+                      value={option}
+                      required
+                      checked={feeling === option}
+                      onChange={() => setFeeling(option)}
+                      className="w-4 h-4 accent-[#0a7e8c]"
+                    />
+                    <span className="text-gray-700 text-sm group-hover:text-[#0a7e8c] transition-colors">
+                      {option}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+
+          {/* Q3 */}
+          <div className="px-8 py-6">
+            <fieldset>
+              <legend className="text-sm font-medium text-gray-800 mb-3">
+                3) What did you notice the most?{' '}
+                <span className="text-red-500 ml-0.5">*</span>
+              </legend>
+              <div className="space-y-2">
+                {NOTICED_OPTIONS.map((option) => (
+                  <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      value={option}
+                      checked={noticed.includes(option)}
+                      onChange={() => toggleNoticed(option)}
+                      className="w-4 h-4 accent-[#0a7e8c] rounded"
+                    />
+                    <span className="text-gray-700 text-sm group-hover:text-[#0a7e8c] transition-colors">
+                      {option}
+                    </span>
+                  </label>
+                ))}
+                {/* Other option */}
+                <div>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={showOther}
+                      onChange={(e) => handleOtherToggle(e.target.checked)}
+                      className="w-4 h-4 accent-[#0a7e8c] rounded"
+                    />
+                    <span className="text-gray-700 text-sm group-hover:text-[#0a7e8c] transition-colors">
+                      Other:
+                    </span>
+                  </label>
+                  {showOther && (
+                    <input
+                      type="text"
+                      value={noticedOther}
+                      onChange={(e) => setNoticedOther(e.target.value)}
+                      placeholder="Your answer"
+                      className="mt-1.5 ml-7 w-[calc(100%-1.75rem)] border-b border-gray-400 focus:border-[#0a7e8c] outline-none py-1 text-gray-700 text-sm transition-colors bg-transparent"
+                    />
+                  )}
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          {/* Q4 */}
+          <div className="px-8 py-6">
+            <fieldset>
+              <legend className="text-sm font-medium text-gray-800 mb-3">
+                4) Would you use GoRoga again?{' '}
+                <span className="text-red-500 ml-0.5">*</span>
+              </legend>
+              <div className="space-y-2">
+                {USE_AGAIN_OPTIONS.map((option) => (
+                  <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="radio"
+                      name="would_use_again"
+                      value={option}
+                      required
+                      checked={wouldUseAgain === option}
+                      onChange={() => setWouldUseAgain(option)}
+                      className="w-4 h-4 accent-[#0a7e8c]"
+                    />
+                    <span className="text-gray-700 text-sm group-hover:text-[#0a7e8c] transition-colors">
+                      {option}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+
+          {/* Q5 */}
+          <div className="px-8 py-6">
+            <label className="block text-sm font-medium text-gray-800 mb-2">
+              Describe your experience in one word.{' '}
+              <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <textarea
+              required
+              value={oneWord}
+              onChange={(e) => setOneWord(e.target.value)}
+              placeholder="Your answer"
+              rows={2}
+              className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent resize-none"
+            />
+          </div>
+
+          {/* Error message */}
+          {submitState === 'error' && (
+            <div className="px-8 py-3 bg-red-50 text-red-600 text-sm">{errorMsg}</div>
+          )}
+
+          {/* Actions */}
+          <div className="px-8 py-6 flex items-center gap-4">
+            <button
+              type="submit"
+              disabled={submitState === 'loading'}
+              className="px-8 py-2.5 rounded-full text-white font-medium shadow-md transition-opacity hover:opacity-90 disabled:opacity-70"
+              style={{ background: 'linear-gradient(135deg, #0a7e8c, #064d57)' }}
+            >
+              {submitState === 'loading' ? 'Submitting…' : 'Submit'}
+            </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-sm font-medium transition-colors hover:opacity-70"
+              style={{ color: '#0a7e8c' }}
+            >
+              Clear form
+            </button>
+          </div>
+
+          <p className="px-8 py-4 text-xs text-gray-400 rounded-b-2xl">
+            Never submit passwords through this form.
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
