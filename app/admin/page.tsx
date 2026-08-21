@@ -205,9 +205,6 @@ export default function AdminPage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-white tracking-tight">GoRoga Admin Panel</h1>
-            <p className="text-xs mt-0.5" style={{ color: TEAL_LIGHT }}>
-              Corporate Event · Response Analytics
-            </p>
           </div>
           <div className="flex items-center gap-3">
             <button
