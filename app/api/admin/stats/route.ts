@@ -101,9 +101,9 @@ export async function GET() {
       }))
       .filter((r) => r.before !== null || r.after !== null);
 
-    // Recent respondents — last 10
+    // Recent responses — last 10
     const recentRespondents = await sql`
-      SELECT id, name, email, phone_no, feeling, would_use_again, created_at
+      SELECT id, feeling, would_use_again, created_at
       FROM responses
       ORDER BY id DESC
       LIMIT 10

@@ -5,9 +5,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      name,
-      email,
-      phone_no,
       pulse_before,
       pulse_after,
       feeling,
@@ -17,7 +14,6 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (
-      !name || !email || !phone_no ||
       !pulse_before || !pulse_after ||
       !feeling || !noticed || !would_use_again || !one_word
     ) {
@@ -28,9 +24,9 @@ export async function POST(req: NextRequest) {
 
     const rows = await sql`
       INSERT INTO responses
-        (name, email, phone_no, pulse_before, pulse_after, feeling, noticed, would_use_again, one_word)
+        (pulse_before, pulse_after, feeling, noticed, would_use_again, one_word)
       VALUES
-        (${name}, ${email}, ${phone_no}, ${pulse_before}, ${pulse_after}, ${feeling}, ${noticedStr}, ${would_use_again}, ${one_word})
+        (${pulse_before}, ${pulse_after}, ${feeling}, ${noticedStr}, ${would_use_again}, ${one_word})
       RETURNING id
     `;
 

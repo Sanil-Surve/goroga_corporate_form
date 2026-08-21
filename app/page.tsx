@@ -16,9 +16,6 @@ const USE_AGAIN_OPTIONS = ['Yes', 'No', 'Maybe'] as const;
 type SubmitState = 'idle' | 'loading' | 'success' | 'error';
 
 export default function GoRogaForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phoneNo, setPhoneNo] = useState('');
   const [pulseBefore, setPulseBefore] = useState('');
   const [pulseAfter, setPulseAfter] = useState('');
   const [feeling, setFeeling] = useState('');
@@ -56,9 +53,6 @@ export default function GoRogaForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          email,
-          phone_no: phoneNo,
           pulse_before: pulseBefore,
           pulse_after: pulseAfter,
           feeling,
@@ -82,9 +76,6 @@ export default function GoRogaForm() {
   };
 
   const handleClear = () => {
-    setName('');
-    setEmail('');
-    setPhoneNo('');
     setPulseBefore('');
     setPulseAfter('');
     setFeeling('');
@@ -133,7 +124,7 @@ export default function GoRogaForm() {
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white leading-tight">GoRoga Corporate Event Form</h1>
+              <h1 className="text-3xl font-bold text-white leading-tight">GoRoga Feedback Form</h1>
               <p className="mt-2 text-sm" style={{ color: '#b8e8ec' }}>* Indicates required question</p>
             </div>
           </div>
@@ -144,60 +135,6 @@ export default function GoRogaForm() {
           onSubmit={handleSubmit}
           className="bg-white rounded-b-2xl shadow-xl divide-y divide-gray-100"
         >
-          {/* Personal Details */}
-          <div className="px-8 py-6">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#0a7e8c' }}>
-              Personal Details
-            </p>
-            <div className="space-y-5">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-1.5">
-                  Full Name <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Rahul Sharma"
-                  className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
-                />
-              </div>
-
-              {/* Email + Phone side by side on md+ */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1.5">
-                    Email Address <span className="text-red-500 ml-0.5">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-1.5">
-                    Phone Number <span className="text-red-500 ml-0.5">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={phoneNo}
-                    onChange={(e) => setPhoneNo(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    pattern="[\+\d\s\-\(\)]{7,20}"
-                    title="Enter a valid phone number"
-                    className="w-full border-b-2 border-gray-300 focus:border-[#0a7e8c] outline-none py-1.5 text-gray-700 transition-colors bg-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
           {/* Q1.1 */}
           <div className="px-8 py-6">
             <label className="block text-sm font-medium text-gray-800 mb-2">

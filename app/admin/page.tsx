@@ -32,9 +32,6 @@ interface PulseTrendItem {
 
 interface RecentRespondent {
   id: number;
-  name: string;
-  email: string;
-  phone_no: string;
   feeling: string;
   would_use_again: string;
   created_at: string;
@@ -524,14 +521,14 @@ export default function AdminPage() {
                   </div>
                 </SectionCard>
 
-                {/* ── Recent Respondents ── */}
+                {/* ── Recent Responses ── */}
                 {stats.recentRespondents.length > 0 && (
-                  <SectionCard title="Recent Respondents (last 10)">
+                  <SectionCard title="Recent Responses (last 10)">
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm text-left">
                         <thead>
                           <tr className="border-b border-gray-100">
-                            {['#', 'Name', 'Email', 'Phone', 'Feeling', 'Use Again', 'Submitted'].map((h) => (
+                            {['#', 'Feeling', 'Use Again', 'Submitted'].map((h) => (
                               <th
                                 key={h}
                                 className="pb-2 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-400 whitespace-nowrap"
@@ -545,17 +542,6 @@ export default function AdminPage() {
                           {stats.recentRespondents.map((r) => (
                             <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                               <td className="py-2.5 pr-4 text-gray-400 text-xs">#{r.id}</td>
-                              <td className="py-2.5 pr-4 font-medium text-gray-800 whitespace-nowrap">{r.name || '—'}</td>
-                              <td className="py-2.5 pr-4 text-gray-600 whitespace-nowrap">
-                                <a
-                                  href={`mailto:${r.email}`}
-                                  className="hover:underline"
-                                  style={{ color: TEAL }}
-                                >
-                                  {r.email || '—'}
-                                </a>
-                              </td>
-                              <td className="py-2.5 pr-4 text-gray-600 whitespace-nowrap">{r.phone_no || '—'}</td>
                               <td className="py-2.5 pr-4">
                                 <span
                                   className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
