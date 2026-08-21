@@ -1,24 +1,11 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
-
-interface Row {
-  feeling: string;
-  noticed: string;
-  would_use_again: string;
-  pulse_before: string;
-  pulse_after: string;
-  one_word: string;
-}
-
-interface CountRow {
-  value: string;
-  count: number;
-}
+import sql from '@/lib/db';
 
 export async function GET() {
   try {
-    const totalRow = db.prepare('SELECT COUNT(*) as count FROM responses').get() as { count: number };
-    const total = totalRow.count;
+    // Total count
+    const totalRes = await sql`SELECT COUNT(*)::int AS count FROM responses`;
+    const total: number = totalRes[0]?.count ?? 0;
 
     if (total === 0) {
       return NextResponse.json({
@@ -26,120 +13,110 @@ export async function GET() {
         feeling: [],
         noticed: [],
         wouldUseAgain: [],
-        recentWords: [],
+        wordCloud: [],
         avgPulseBefore: null,
         avgPulseAfter: null,
+        pulseTrend: [],
+        recentRespondents: [],
       });
     }
 
     // Q2 — feeling distribution
-    const feelingRows = db
-      .prepare(
-        `SELECT feeling as value, COUNT(*) as count
-         FROM responses
-         GROUP BY feeling
-         ORDER BY count DESC`
-      )
-      .all() as CountRow[];
+    const feelingRows = await sql`
+      SELECT feeling AS value, COUNT(*)::int AS count
+      FROM responses
+      GROUP BY feeling
+      ORDER BY count DESC
+    `;
 
     // Q4 — would use again distribution
-    const useAgainRows = db
-      .prepare(
-        `SELECT would_use_again as value, COUNT(*) as count
-         FROM responses
-         GROUP BY would_use_again
-         ORDER BY count DESC`
-      )
-      .all() as CountRow[];
+    const useAgainRows = await sql`
+      SELECT would_use_again AS value, COUNT(*)::int AS count
+      FROM responses
+      GROUP BY would_use_again
+      ORDER BY count DESC
+    `;
 
-    // Q3 — noticed (comma-separated, split and count each tag)
-    const noticedRaw = db
-      .prepare('SELECT noticed FROM responses')
-      .all() as { noticed: string }[];
+    // Q3 — noticed (comma-separated → unnest → count each tag)
+    const noticedRows = await sql`
+      SELECT TRIM(tag) AS value, COUNT(*)::int AS count
+      FROM responses,
+           UNNEST(STRING_TO_ARRAY(noticed, ',')) AS tag
+      WHERE TRIM(tag) != ''
+      GROUP BY TRIM(tag)
+      ORDER BY count DESC
+    `;
 
-    const noticedMap: Record<string, number> = {};
-    for (const row of noticedRaw) {
-      const tags = row.noticed.split(',').map((t) => t.trim()).filter(Boolean);
-      for (const tag of tags) {
-        noticedMap[tag] = (noticedMap[tag] ?? 0) + 1;
-      }
-    }
-    const noticedRows: CountRow[] = Object.entries(noticedMap)
-      .map(([value, count]) => ({ value, count }))
-      .sort((a, b) => b.count - a.count);
+    // Pulse averages (only rows where value is a valid number)
+    const pulseAvgRes = await sql`
+      SELECT
+        ROUND(
+          AVG(CASE WHEN pulse_before ~ '^[0-9]+\.?[0-9]*$'
+                   THEN pulse_before::numeric ELSE NULL END)::numeric, 1
+        ) AS avg_before,
+        ROUND(
+          AVG(CASE WHEN pulse_after ~ '^[0-9]+\.?[0-9]*$'
+                   THEN pulse_after::numeric ELSE NULL END)::numeric, 1
+        ) AS avg_after
+      FROM responses
+    `;
+    const avgPulseBefore = pulseAvgRes[0]?.avg_before
+      ? Number(pulseAvgRes[0].avg_before)
+      : null;
+    const avgPulseAfter = pulseAvgRes[0]?.avg_after
+      ? Number(pulseAvgRes[0].avg_after)
+      : null;
 
-    // Pulse averages (only numeric values)
-    const pulseRows = db
-      .prepare('SELECT pulse_before, pulse_after FROM responses')
-      .all() as Pick<Row, 'pulse_before' | 'pulse_after'>[];
+    // Word cloud — one_word frequency (top 15)
+    const wordCloudRows = await sql`
+      SELECT LOWER(TRIM(one_word)) AS value, COUNT(*)::int AS count
+      FROM responses
+      WHERE TRIM(one_word) != ''
+      GROUP BY LOWER(TRIM(one_word))
+      ORDER BY count DESC
+      LIMIT 15
+    `;
 
-    const numericBefore = pulseRows
-      .map((r) => parseFloat(r.pulse_before))
-      .filter((n) => !isNaN(n));
-    const numericAfter = pulseRows
-      .map((r) => parseFloat(r.pulse_after))
-      .filter((n) => !isNaN(n));
+    // Pulse trend — last 10 responses (only numeric pulse values)
+    const trendRows = await sql`
+      SELECT
+        id,
+        pulse_before,
+        pulse_after
+      FROM responses
+      ORDER BY id DESC
+      LIMIT 10
+    `;
 
-    const avg = (arr: number[]) =>
-      arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : null;
-
-    // Recent one-word responses (last 20)
-    const wordRows = db
-      .prepare('SELECT one_word FROM responses ORDER BY id DESC LIMIT 20')
-      .all() as { one_word: string }[];
-
-    // Build word frequency map for one-word answers
-    const wordMap: Record<string, number> = {};
-    for (const row of wordRows) {
-      const w = row.one_word.trim().toLowerCase();
-      if (w) wordMap[w] = (wordMap[w] ?? 0) + 1;
-    }
-    const wordCloud = Object.entries(wordMap)
-      .map(([value, count]) => ({ value, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 15);
-
-    // Pulse trend — last 10 responses
-    const trendRows = db
-      .prepare(
-        `SELECT id, pulse_before, pulse_after, created_at
-         FROM responses ORDER BY id DESC LIMIT 10`
-      )
-      .all() as { id: number; pulse_before: string; pulse_after: string; created_at: string }[];
-
-    const pulseTrend = trendRows
+    const pulseTrend = [...trendRows]
       .reverse()
-      .map((r, i) => ({
+      .map((r) => ({
         label: `#${r.id}`,
-        before: parseFloat(r.pulse_before) || null,
-        after: parseFloat(r.pulse_after) || null,
+        before: /^[0-9]+\.?[0-9]*$/.test(String(r.pulse_before).trim())
+          ? Number(r.pulse_before)
+          : null,
+        after: /^[0-9]+\.?[0-9]*$/.test(String(r.pulse_after).trim())
+          ? Number(r.pulse_after)
+          : null,
       }))
       .filter((r) => r.before !== null || r.after !== null);
 
     // Recent respondents — last 10
-    const recentRespondents = db
-      .prepare(
-        `SELECT id, name, email, phone_no, feeling, would_use_again, created_at
-         FROM responses ORDER BY id DESC LIMIT 10`
-      )
-      .all() as {
-        id: number;
-        name: string;
-        email: string;
-        phone_no: string;
-        feeling: string;
-        would_use_again: string;
-        created_at: string;
-      }[];
+    const recentRespondents = await sql`
+      SELECT id, name, email, phone_no, feeling, would_use_again, created_at
+      FROM responses
+      ORDER BY id DESC
+      LIMIT 10
+    `;
 
     return NextResponse.json({
       total,
       feeling: feelingRows,
       noticed: noticedRows,
       wouldUseAgain: useAgainRows,
-      wordCloud,
-      avgPulseBefore: avg(numericBefore),
-      avgPulseAfter: avg(numericAfter),
+      wordCloud: wordCloudRows,
+      avgPulseBefore,
+      avgPulseAfter,
       pulseTrend,
       recentRespondents,
     });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import sql from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,20 +26,15 @@ export async function POST(req: NextRequest) {
 
     const noticedStr = Array.isArray(noticed) ? noticed.join(', ') : noticed;
 
-    const stmt = db.prepare(`
+    const rows = await sql`
       INSERT INTO responses
         (name, email, phone_no, pulse_before, pulse_after, feeling, noticed, would_use_again, one_word)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+      VALUES
+        (${name}, ${email}, ${phone_no}, ${pulse_before}, ${pulse_after}, ${feeling}, ${noticedStr}, ${would_use_again}, ${one_word})
+      RETURNING id
+    `;
 
-    const result = stmt.run(
-      name, email, phone_no,
-      pulse_before, pulse_after,
-      feeling, noticedStr,
-      would_use_again, one_word
-    );
-
-    return NextResponse.json({ success: true, id: result.lastInsertRowid }, { status: 201 });
+    return NextResponse.json({ success: true, id: rows[0].id }, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
