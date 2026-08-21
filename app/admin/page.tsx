@@ -115,13 +115,12 @@ const StatCard = ({
         </span>
         {badge && (
           <span
-            className={`text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full ${
-              badgeType === 'positive'
+            className={`text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full ${badgeType === 'positive'
                 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/50'
                 : badgeType === 'accent'
                   ? 'bg-teal-50 text-teal-700 border border-teal-200/50'
                   : 'bg-slate-100 text-slate-600'
-            }`}
+              }`}
           >
             {badge}
           </span>
@@ -239,9 +238,9 @@ export default function AdminPage() {
 
   const pulseDelta =
     stats?.avgPulseBefore !== null &&
-    stats?.avgPulseBefore !== undefined &&
-    stats?.avgPulseAfter !== null &&
-    stats?.avgPulseAfter !== undefined
+      stats?.avgPulseBefore !== undefined &&
+      stats?.avgPulseAfter !== null &&
+      stats?.avgPulseAfter !== undefined
       ? Number((stats.avgPulseAfter - stats.avgPulseBefore).toFixed(1))
       : null;
 
@@ -309,9 +308,9 @@ export default function AdminPage() {
 
             {/* Desktop Actions */}
             <div className="hidden sm:flex items-center gap-3">
-              <span className="text-xs text-teal-100/70">
+              {/* <span className="text-xs text-teal-100/70">
                 Updated {lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
+              </span> */}
               <button
                 onClick={handleDownloadPdf}
                 disabled={!stats || loading || isExportingPdf}
@@ -742,21 +741,19 @@ export default function AdminPage() {
                         return (
                           <span
                             key={w.value}
-                            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all hover:scale-105 ${
-                              isTop
+                            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all hover:scale-105 ${isTop
                                 ? 'bg-teal-600 text-white shadow-sm'
                                 : idx % 2 === 0
                                   ? 'bg-teal-50 text-teal-800 border border-teal-200/60'
                                   : 'bg-cyan-50 text-cyan-800 border border-cyan-200/60'
-                            }`}
+                              }`}
                           >
                             <span>{w.value}</span>
                             <span
-                              className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                                isTop
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full ${isTop
                                   ? 'bg-white/25 text-white'
                                   : 'bg-white text-slate-600 border border-slate-200/60'
-                              }`}
+                                }`}
                             >
                               {w.count}
                             </span>
@@ -864,13 +861,12 @@ export default function AdminPage() {
                               </td>
                               <td className="py-2.5 px-3">
                                 <span
-                                  className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                    r.would_use_again === 'Yes'
+                                  className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${r.would_use_again === 'Yes'
                                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50'
                                       : r.would_use_again === 'No'
                                         ? 'bg-red-50 text-red-700 border border-red-200/50'
                                         : 'bg-amber-50 text-amber-700 border border-amber-200/50'
-                                  }`}
+                                    }`}
                                 >
                                   {r.would_use_again || '—'}
                                 </span>
