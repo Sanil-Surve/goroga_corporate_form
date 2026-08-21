@@ -16,6 +16,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { generatePdfReport } from '@/lib/generatePdfReport';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -160,6 +161,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
@@ -176,6 +178,18 @@ export default function AdminPage() {
       setLoading(false);
     }
   }, []);
+
+  const handleDownloadPdf = () => {
+    if (!stats) return;
+    try {
+      setIsExportingPdf(true);
+      generatePdfReport(stats);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   useEffect(() => {
     fetchStats();
@@ -195,14 +209,37 @@ export default function AdminPage() {
               Corporate Event · Response Analytics
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            {/* <span className="text-xs" style={{ color: TEAL_LIGHT }}>
-              Last updated: {lastRefresh.toLocaleTimeString()}
-            </span> */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDownloadPdf}
+              disabled={!stats || loading || isExportingPdf}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-all shadow-sm hover:brightness-110 disabled:opacity-50 text-white cursor-pointer"
+              style={{
+                backgroundColor: '#0a9396',
+                border: '1px solid rgba(255, 255, 255, 0.35)',
+              }}
+              title="Download comprehensive PDF analytics report"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              {isExportingPdf ? 'Exporting PDF…' : 'Download PDF'}
+            </button>
+
             <button
               onClick={fetchStats}
               disabled={loading}
-              className="px-4 py-1.5 rounded-full text-sm font-medium bg-white transition-opacity hover:opacity-80 disabled:opacity-50"
+              className="px-4 py-1.5 rounded-full text-sm font-medium bg-white transition-opacity hover:opacity-80 disabled:opacity-50 cursor-pointer"
               style={{ color: TEAL }}
             >
               {loading ? 'Refreshing…' : '↻ Refresh'}
